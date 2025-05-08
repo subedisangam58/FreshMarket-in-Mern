@@ -15,7 +15,7 @@ type CropsDiseasesJson = {
 };
 
 export default function CropsDiseases() {
-    const rawData = diseasesData as CropsDiseasesJson;
+    const rawData = diseasesData as unknown as CropsDiseasesJson;
     const cropNames = Object.keys(rawData);
     const [selectedCrop, setSelectedCrop] = useState<string | null>(null);
 
@@ -32,7 +32,7 @@ export default function CropsDiseases() {
             <h1 className="text-3xl font-bold mb-6 text-green-700 pl-20 pr-20">बाली अनुसार रोग जानकारी</h1>
 
             {!selectedCrop ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 pl-20 pr-20">
                     {cropNames.map((crop) => {
                         const image = getFirstImage(crop);
                         return (

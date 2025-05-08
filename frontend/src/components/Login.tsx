@@ -61,7 +61,7 @@ function Login() {
             const role = result.user?.role;
             if (role === "farmer") {
                 router.push("/farmer/dashboard");
-            } else if (role === "client") {
+            } else if (role === "user") {
                 router.push("/client/dashboard");
             } else {
                 router.push("/");

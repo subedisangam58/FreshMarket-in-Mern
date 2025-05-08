@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Order from '../models/order';
 import { IUser } from '../models/user';
+import Cart from '../models/cart';
 
 // Extend Express Request to include req.user
 interface AuthenticatedRequest extends Request {
@@ -16,10 +17,14 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response): Pro
 
         const order = new Order({
             ...req.body,
-            user: req.user._id, // save only the user ID
+            user: req.user._id,
         });
 
         await order.save();
+
+        // ✅ Clear the user's cart after successful order
+        await Cart.deleteMany({ user: req.user._id });
+
         res.status(201).json({
             success: true,
             message: 'Order placed successfully',
@@ -30,6 +35,7 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response): Pro
         res.status(500).json({ message: error.message || 'Failed to create order' });
     }
 };
+
 
 export const getAllOrders = async (_req: Request, res: Response): Promise<void> => {
     try {
@@ -76,10 +82,9 @@ export const getOrdersByUser = async (req: Request, res: Response): Promise<void
 
         res.status(200).json({
             success: true,
-            orders,
+            orders, // could be empty [], which is okay
         });
     } catch (error: any) {
-        console.error('Error fetching user orders:', error);
         res.status(500).json({ message: error.message || 'Failed to fetch user orders' });
     }
 };

@@ -1,100 +1,106 @@
 "use client";
+
 import {
-    BarChart2,
+    LayoutDashboard,
     Bell,
     HelpCircle,
-    Home,
     LogOut,
     Menu,
     Settings,
+    ShoppingCart,
     User,
     X
 } from "lucide-react";
 import { FC, JSX } from "react";
+import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
 
 type NavItem = {
     id: string;
     name: string;
     icon: JSX.Element;
+    path: string;
 };
 
 interface SideNavbarProps {
     isSidebarOpen: boolean;
     toggleSidebar: () => void;
     activePage: string;
-    navigateTo: (page: string) => void;
 }
 
 const SideNavbar: FC<SideNavbarProps> = ({
     isSidebarOpen,
     toggleSidebar,
-    activePage,
-    navigateTo
+    activePage
 }) => {
-    // Navigation items
+    const { user, logout } = useAuth();
+
     const navItems: NavItem[] = [
-        { id: "home", name: "Dashboard", icon: <Home size={20} /> },
-        { id: "statistics", name: "Statistics", icon: <BarChart2 size={20} /> },
-        { id: "notifications", name: "Notifications", icon: <Bell size={20} /> },
-        { id: "settings", name: "Settings", icon: <Settings size={20} /> },
-        { id: "support", name: "Support", icon: <HelpCircle size={20} /> },
-        { id: "feedback", name: "Feedback", icon: <Menu size={20} /> },
+        { id: "overview", name: "Overview", icon: <LayoutDashboard size={20} />, path: "/client/dashboard" },
+        { id: "orders", name: "My Orders", icon: <ShoppingCart size={20} />, path: "/client/orderhistory" },
+        { id: "cart", name: "My Cart", icon: <ShoppingCart size={20} />, path: "/client/cart" },
+        { id: "notifications", name: "Notifications", icon: <Bell size={20} />, path: "/client/notifications" },
+        { id: "profile", name: "Profile Settings", icon: <Settings size={20} />, path: "/client/profile" },
+        { id: "support", name: "Support", icon: <HelpCircle size={20} />, path: "/client/support" },
     ];
 
     return (
-        <div
-            className={`${isSidebarOpen ? "w-64" : "w-20"} bg-gray-800 text-white transition-all duration-300 ease-in-out`}
-        >
-            <div className="p-4 flex items-center justify-between">
-                {isSidebarOpen && <h1 className="text-xl font-bold">Dashboard</h1>}
-                <button onClick={toggleSidebar} className="p-2 rounded-md hover:bg-gray-700">
-                    {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-                </button>
-            </div>
+        <>
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+                    onClick={toggleSidebar}
+                />
+            )}
 
-            <div className="mt-4">
-                <nav className="space-y-1">
+            <div
+                className={`fixed z-50 top-0 left-0 h-full bg-gray-800 text-white transition-all duration-300 ease-in-out
+                    ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} w-64 lg:translate-x-0 lg:static`}
+            >
+                <div className="p-4 flex items-center justify-between">
+                    {isSidebarOpen && <h1 className="text-xl font-bold">Dashboard</h1>}
+                    <button onClick={toggleSidebar} className="p-2 rounded-md hover:bg-gray-700 lg:hidden">
+                        {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                    </button>
+                </div>
+
+                <nav className="mt-4 space-y-1">
                     {navItems.map((item) => (
-                        <button
+                        <Link
                             key={item.id}
-                            className={`flex items-center ${isSidebarOpen ? "px-4" : "justify-center px-2"} py-3 w-full ${activePage === item.id
-                                ? "bg-gray-700 text-white"
-                                : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                            href={item.path}
+                            className={`flex items-center w-full py-3 ${isSidebarOpen ? "px-4" : "justify-center px-2"}
+                                ${activePage === item.id
+                                    ? "bg-gray-700 text-white"
+                                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
                                 }`}
-                            onClick={() => navigateTo(item.id)}
                         >
                             <span className="mr-3">{item.icon}</span>
                             {isSidebarOpen && <span>{item.name}</span>}
-                        </button>
+                        </Link>
                     ))}
                 </nav>
-            </div>
 
-            {/* User profile at bottom of sidebar */}
-            <div className="absolute bottom-0 w-full p-4">
-                <div className={`flex ${isSidebarOpen ? "items-center" : "justify-center"} text-sm`}>
-                    <div className="flex-shrink-0">
+                <div className="absolute bottom-0 w-full p-4">
+                    <div className={`flex ${isSidebarOpen ? "items-center" : "justify-center"} text-sm`}>
                         <User size={24} className="text-gray-300" />
+                        {isSidebarOpen && user && (
+                            <div className="ml-3">
+                                <p className="font-medium">{user.name}</p>
+                                <p className="text-gray-400 text-xs">{user.email}</p>
+                            </div>
+                        )}
                     </div>
-                    {isSidebarOpen && (
-                        <div className="ml-3">
-                            <p className="font-medium">John Doe</p>
-                            <p className="text-gray-400">john@example.com</p>
-                        </div>
-                    )}
-                </div>
-                {isSidebarOpen ? (
-                    <button className="mt-4 flex items-center text-gray-300 hover:text-white w-full">
+                    <button
+                        onClick={logout}
+                        className={`mt-4 flex w-full text-gray-300 hover:text-white ${isSidebarOpen ? "items-center" : "justify-center"}`}
+                    >
                         <LogOut size={18} className="mr-2" />
-                        <span>Log out</span>
+                        {isSidebarOpen && <span>Log out</span>}
                     </button>
-                ) : (
-                    <button className="mt-4 flex justify-center text-gray-300 hover:text-white w-full">
-                        <LogOut size={18} />
-                    </button>
-                )}
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

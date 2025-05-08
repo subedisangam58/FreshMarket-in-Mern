@@ -6,6 +6,7 @@ import {
     logout,
     forgotPassword,
     resetPassword,
+    updateProfile,
     checkAuth
 } from '../controllers/auth.controller';
 
@@ -19,5 +20,6 @@ router.post('/logout', logout);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 router.get('/check-auth', checkAuth);
+router.patch('/update-profile', updateProfile);
 
 export default router;

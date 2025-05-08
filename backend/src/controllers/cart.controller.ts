@@ -56,3 +56,36 @@ export const getUserCart = async (req: AuthenticatedRequest, res: Response): Pro
         res.status(500).json({ success: false, message: error.message || 'Failed to fetch cart' });
     }
 };
+
+export const updateCartItem = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user?._id;
+        const { id } = req.params;
+        const { quantity } = req.body;
+
+        if (!userId) {
+            res.status(401).json({ success: false, message: "Unauthorized" });
+            return;
+        }
+
+        if (!quantity || quantity < 1) {
+            res.status(400).json({ success: false, message: "Invalid quantity" });
+            return;
+        }
+
+        const item = await Cart.findOne({ _id: id, user: userId });
+        if (!item) {
+            res.status(404).json({ success: false, message: "Cart item not found" });
+            return;
+        }
+
+        item.quantity = quantity;
+        await item.save();
+
+        res.status(200).json({ success: true, message: "Quantity updated", cart: item });
+    } catch (error: any) {
+        console.error("Error in updateCartItem:", error);
+        res.status(500).json({ success: false, message: error.message || "Failed to update item" });
+    }
+};
+

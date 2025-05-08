@@ -206,3 +206,49 @@ export const checkAuth = async (req: AuthenticatedRequest, res: Response): Promi
         res.status(400).json({ success: false, message: error.message });
     }
 };
+
+export const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.session.userId;
+        if (!userId) {
+            res.status(401).json({ success: false, message: 'Not authenticated' });
+            return;
+        }
+
+        const { name, phone, address, imageUrl } = req.body;
+
+        if (!name || !phone || !address) {
+            res.status(400).json({
+                success: false,
+                message: 'Name, phone, and address are required',
+            });
+            return;
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            res.status(404).json({ success: false, message: 'User not found' });
+            return;
+        }
+
+        user.name = name;
+        user.phone = phone;
+        user.address = address;
+        if (imageUrl !== undefined) {
+            user.imageUrl = imageUrl;
+        }
+
+        await user.save();
+
+        const { password: _, ...sanitizedUser } = user.toObject();
+        res.status(200).json({
+            success: true,
+            message: 'Profile updated successfully',
+            user: sanitizedUser,
+        });
+    } catch (error: any) {
+        console.error("Error in updateProfile:", error);
+        res.status(500).json({ success: false, message: error.message || 'Failed to update profile' });
+    }
+};
+

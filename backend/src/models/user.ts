@@ -9,6 +9,7 @@ export interface IUser extends Document {
     phone: string;
     address: string;
     role: UserRole;
+    imageUrl?: string; // ✅ added this line
     lastLogin?: Date;
     resetPasswordToken?: string;
     resetPasswordExpiresAt?: Date;
@@ -29,6 +30,7 @@ const userSchema = new Schema<IUser>(
             enum: ['admin', 'farmer', 'user'],
             default: 'user',
         },
+        imageUrl: { type: String }, // ✅ new field for profile picture
         lastLogin: { type: Date, default: Date.now },
         resetPasswordToken: { type: String },
         resetPasswordExpiresAt: { type: Date },
